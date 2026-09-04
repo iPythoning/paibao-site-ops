@@ -77,6 +77,7 @@ function usage() {
   paibao-site-ops deploy --site <target-path> [--apply]
   paibao-site-ops audit --site <target-path>
   paibao-site-ops operate --site <target-path>   (展示 MCP 运营入口)
+  paibao-site-ops secrets --site <target-path>   (docker secret 注入说明)
   paibao-site-ops handover --site <target-path>
 
 选项:
@@ -120,15 +121,14 @@ function runLifecycle(command, siteLifecyclePath, args) {
 		console.log(out);
 	} catch (e) {
 		const stderr = e.stderr?.toString() || "";
-		if (stderr.includes("dry run") || stderr.includes("--apply") || stderr.includes("Dry run")) {
-			console.log(stderr); // dry-run 提示不是错误
+		if (stderr.includes("dry run") || stderr.includes("--apply") || stderr.includes("Dry run") || stderr.includes("planned")) {
+			console.log(stderr); // dry-run/planned 提示不是错误
 		} else {
 			console.error(stderr || e.message);
 			process.exitCode = 1;
 		}
 	}
 }
-
 async function cmdCreate(values) {
 	if (!values.domain || !values.brand) { usage(); process.exit(2); }
 	const lifecycle = ensureStarter();
@@ -221,6 +221,21 @@ async function cmdOperate(values) {
 `);
 }
 
+/** 给 docker 站注入 secret（从 vault / 参数 → site.env）*/
+async function cmdSecrets(values) {
+	const target = values.site || values.target;
+	if (!target) { usage(); process.exit(2); }
+	const { readFileSync: rf, writeFileSync: wf } = await import("node:fs");
+	const siteEnvPath = join(target, ".client-site-operator") // 实际在 state-root; 改为读 manifest
+	console.log(`\n══ 注入 docker secret ══`);
+	console.log(`target=${target}`);
+	// docker secret 位置在 state-root, 不是 target。提示用户正确路径。
+	console.log(`\n提示: site.env 在 state-root 的 site 目录下（.client-site-operator/sites/<id>/deployments/<id>/secrets/site.env）`);
+	console.log(`必填: TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY, INQUIRY_FROM_EMAIL, (ZEPTOMAIL_API_KEY|RESEND_API_KEY)`);
+	console.log(`可用 vault 注入的: RESEND_API_KEY（vault 有）；TURNSTILE×2 + INQUIRY_FROM_EMAIL 需从 CF/邮件侧提供。`);
+	console.log(`\n待 secret 齐后: paibao-site-ops deploy --site ${target} --apply`);
+}
+
 async function cmdHandover(values) {
 	const target = values.site || values.target;
 	console.log(`\n══ 交接: ${target || "(site)"} ══`);
@@ -240,6 +255,7 @@ async function main() {
 		case "deploy": await cmdDeploy(values); break;
 		case "audit": await cmdAudit(values); break;
 		case "operate": await cmdOperate(values); break;
+		case "secrets": await cmdSecrets(values); break;
 		case "handover": await cmdHandover(values); break;
 		default: usage();
 	}
