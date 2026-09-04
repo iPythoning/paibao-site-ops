@@ -1,0 +1,9 @@
+{
+  "name": "paibao-site-ops",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AI/agent 一句话从 0 建站、配置、运营 — 编排 EmDash 建站 SOP（开源，Cloud/FDE 版付费）",
+  "bin": { "paibao-site-ops": "./bin/paibao-site-ops.mjs" },
+  "engines": { "node": ">=20" }
+}
