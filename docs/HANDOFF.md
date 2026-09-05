@@ -1,21 +1,23 @@
 # HANDOFF — paibao-site-ops
 
-最后更新：2026-09-05 17:50 +0800
+最后更新：2026-09-05 18:25 +0800
 
-## 最新：授权清史已执行，当前可控历史安全扫描通过
+## 最新：fork PR门禁已修并独立复核通过，发布候选就绪
 
 - 用户17:05明确授权追溯、备份后清史及可能的受控强推。站点完成三份age加密备份和解密校验；当前登录表只读查无匹配，未用旧值认证。
 - 站点14个本地ref精确重写，原8个在途文件和1条可见stash保留；远端仅3个分支以atomic+逐ref旧SHA lease更新。main现`9ebe7c7`，修复分支映射为`9760ffd`；没有把功能修复合入main，也未动容器/CF/文章。
 - 本地全部5233个对象查无该值，历史gitleaks=0，新历史MCP38/38。10条确证误报仅更新提交fingerprint。完整证据见站点私有仓`docs/SECURITY-HISTORY-CLEANUP-20260905.md`。
-- **新鲜验证**：504项（ops39+MCP38+CMS427）、seed/typecheck(0error)/build、npm pack dry-run、两仓历史gitleaks/diff检查全部通过。本地验证不是GitHub CI。
-- **新阻塞**：独立原生Codex审查17文件，exit0但结论BLOCKED；本仓pr-check、站点quality/release直接跳过fork PR job，可能绕过required checks。主代理核验确认；私有完整报告在站点`docs/reviews/20260905-release-review.md`。未修复或放行。
+- **已修上次审查阻塞**：三个workflow删除跳过fork的job级if；fork固定hosted并短路CI_RUNNER解析，同仓PR/push/dispatch保留受管路由。没有新增pull_request_target，没有让fork进入持久runner。
+- **TDD**：ops RED `31c3f26`→GREEN `018d980`；站点 RED `04c24f9`→GREEN `58b44d3`。新增两个路由测试文件，覆盖三个job、8类事件/配置组合、坏配置的短路与显式失败，并防止重新跳过job或断开CI测试接线。
+- **新鲜验证**：507项（ops40+站点MCP/路由40+CMS427）、干净npm ci、seed/typecheck(0error)/build、npm pack dry-run全过；三个YAML与17个bash块语法通过。
+- **独立复核PASS**：原生Codex只读复核这批修复，确认关闭此前唯一BLOCKER；私有报告在站点`docs/reviews/20260905-fork-routing-review.md`。PASS限静态实现和回归设计，未创建真实fork PR，不冒充Actions官方解释器或fork调度实测。
 - **剩余边界**：GitHub保留7个只读旧PR快照，需平台处理（todo#29）；不能冒充所有缓存均已清除。功能修复PR/CI仍未完成。
 - **纠正runner阻塞**：ops为public仓，受管reconcile明确跳过public，可用hosted；站点private且已有online xserver runner。旧注册工具有token argv问题，未运行，不必为已有/不需要的runner冒险注册。
 - 原始授权已从会话请求d68f4872/用户f21c0df1核验。压缩后goal/NOW的等待授权状态滞后，不能据旧指针重复请求或猜测用户决定。
 
-本轮ops仅修改本文；站点修改精确扫描指纹/交接，新增安全清理记录与独立复核报告。没有新增业务调用，新文件仅存证/交接。
+本轮文件：ops `.github/workflows/pr-check.yml`修改调度；新增`test/ci-routing.test.mjs`，由既有npm test自动收集；本文更新交接。站点修改quality/release，新增`scripts/ci-routing.test.mjs`并接入Quality，AGENTS同步验证入口，新增复核报告。CI增加测试调用，业务运行时调用关系不变，零新增依赖；不做npm发版或无关版本号重构。
 
-下一步硬停：等待确认#30——三个workflow的fork PR固定hosted执行、同仓保留CI_RUNNER，补回归再复核/PR/CI；当前不合并功能修复。原goal及todo#28保持in_progress（依赖#30），#29独立跟踪旧PR快照；人工OAuth/后台、新Docker前置不变。
+下一步：按ship流程发布两仓候选分支、检查PR的实际job/runner/结论，全部成功才合main；不能把本地绿冒充CI绿。合main后将技能入口迁回稳定main。#30已完成，#28继续，#29独立跟踪旧PR快照；人工OAuth/后台、新Docker前置不变。
 
 ## 2026-09-05 14:47 · 发布基线修复记录（历史状态，以上最新段落覆盖）
 
