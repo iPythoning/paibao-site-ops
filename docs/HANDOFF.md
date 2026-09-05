@@ -1,44 +1,53 @@
 # HANDOFF — paibao-site-ops
 
-最后更新：2026-09-05 10:05 +0800
+最后更新：2026-09-05 12:11 +0800
 
-## 当前目标与边界
+## 当前任务 / 写入者
 
-目标是智能体经 EmDash MCP 接管真实站（可建稿、人可后台改），用户要求先 Docker、暂停 CF；最新指令为用 GPT 子代理全面检查。此次完成诊断而非实施。下一步需用户确认多文件修复方案，不得继续声称 Docker 已部署。
+用户已批准修复假成功、凭据传递、离线测试，然后继续 Docker/MCP 验收。CF 控制面操作暂停，不擅自发布生产草稿。主代理为唯一写入者；两个 Codex writer 因沙箱禁止 Git 元数据写入在 RED 提交处停止并撤回文件，未实施。随后主代理亲自写测试、修复、验证及提交。不存在仍活跃的代码子代理。
 
-当前写入者：Pi 主代理，仅写审查/交接文档。三个原生 Codex 只读进程（配置 gpt-5.6-sol）已结束；不再有后台审查写入者。
+- 本仓分支 `fix/verified-lifecycle-20260905`，原业务基线 `2196091`，审查文档基线 `25624c2`。
+- 模板 `../client-sites/_factory/client-site-starter` HEAD `fcb27b8` 实际在 `merge/sop-preview-into-main`，并非 main；禁止未经核对合并/切换。
+- MCP修复隔离分支 `fix/mcp-demo-verification-20260905`，路径 `../paibaowork-mcp-verification`；原站 `../client-sites/paibaowork` 有他人文章/封面未提交，未触碰。
 
-## 仓库现状
+## 已完成与实证
 
-- 本仓 main，业务代码基线 `2196091`；本轮仅新增本文件及 `AUDIT-2026-09-05.md`。
-- 模板 `../client-sites/_factory/client-site-starter` HEAD `fcb27b8` 在 `merge/sop-preview-into-main`，并非 main；禁止未经核对合并/切换其在途分支。
-- 真实站工具 `../client-sites/paibaowork` main `58a7a77`；另有他人文章/封面未提交，不属于本次，禁止清理/覆盖。
-- 本仓没有根 AGENTS.md 和测试 scripts。先检查路径存在，不重复 read ENOENT。
+- 旧问题和审查取舍：[AUDIT-2026-09-05.md](AUDIT-2026-09-05.md)。其中旧状态由本文件覆盖。
+- TDD：35项中33 fail → 35 pass；独立复核发现合法幂等状态被拒等问题 → 新增4项RED → **39/39全绿**。RED checkpoints `6c1d35a` / `e8d83d4`。
+- CLI 删除 stderr 关键词吞错和无条件完成提示；严格JSON/退出码/命令状态，支持模板合法 `unchanged` / `reconfigured`，保留结构化不可回滚安全信号。
+- deploy apply 必须 GHCR digest + baseline commit/fingerprint，白名单透传；支持显式 starter/state/target 路径。
+- secrets/operate/handover 明确 `instructions_only`，不虚构已注入/连接；CF写路径 fail-closed，旧execSync预建代码已移除。
+- npm check/test/coverage入口、AGENTS与技能已同步真实边界。CLI行覆盖率96.71%（分支63.41%，不是全分支覆盖）。
+- 真模板 create dry-run：exit0/planned；本机Docker29.7.2、Xserver SSH/Docker27.5.1只读探针成功。**未部署新Docker容器**。
+- MCP工具38/38回归通过；真实paibaowork tools/list=51、pulseagent=53，两站各创建一篇草稿并独立读回成功，仍未发布。完整ID见MCP分支HANDOFF。
+- 独立GPT复核发现5项：幂等回执、具名站点token回退、query凭据、ok:false工具回执、CLI创建状态验证；均加RED并修复，主代理复跑GREEN。
 
-## 已完成
+## Docker真实前置（仍未齐备/验收）
 
-- 三路 GPT 审查：CLI 正确性、Docker 契约、MCP 原目标证据；主代理已核验关键源码。
-- 完整问题、行号、证据、建议及取舍见 [AUDIT-2026-09-05.md](AUDIT-2026-09-05.md)。这份文档为持久事实源。
-- Pi 子代理启动器 MODULE_NOT_FOUND 与业务代码无关；已通过原生 Codex read-only 恢复审查，未改 Pi 安装。
+完整secret契约：TURNSTILE_SITE_KEY、TURNSTILE_SECRET_KEY、INQUIRY_FROM_EMAIL、ZEPTOMAIL_API_KEY或RESEND_API_KEY、CONTROL_PLANE_URL、CONTROL_PLANE_SITE_TOKEN；INQUIRY_FROM_NAME可选，SEO_CANONICAL_*与受管身份一致。目录0700/site.env0600。以模板validator为准，不能塞假值绕门。
 
-## 阻塞与纠错
+还需：隔离站控制面注册、完整真实secret、经验证构建的GHCR digest/baseline、模板分支与部署路径审核。已有paibaowork Docker站MCP成功不能代替“新建Docker站部署完成”。
 
-1. `bin/paibao-site-ops.mjs` runLifecycle 吞错、create 无条件输出完成；secrets/operate 仅打印；deploy 未透传 digest/baseline。
-2. Docker 不仅缺 Turnstile/发件邮箱，还需控制面 URL/site token 与邮件 provider。不得用假值绕门禁。
-3. 双站 demo shell 有 token argv 暴露与 JSON-RPC 错误仍报成功。未修。
-4. 第二厂商真写、后台可编辑、两站人工发布/明确不发决定没有完整验收。goal 保持 active。
-5. CF token“必须40位、不能带前缀、已被撤销”等旧结论无依据，撤回。对话暴露的凭据仍需轮换。
+## 人工阻塞 / 原goal剩余
+
+- Claude auth status虽loggedIn，但真实Sonnet请求仍401 OAuth revoked，未完成第二厂商写入；老板须 `claude auth login`。
+- ego-browser task space **6** 已交用户，页面paibaowork.com/admin-login。无已登录session、vault无管理员凭据引用。等用户明确确认后takeOver，验证草稿可编辑，不能自动publish。
+- 两站发布仍需本人审阅或明确选择不发；不以draft回读冒充后台编辑/前台200。
+- CF token长度/前缀与撤销判断无依据，旧结论撤回；曾暴露凭据仍须轮换。
 
 ## 验证方式
 
-本轮仅文档交付：`git diff --check`，JS `node --check bin/paibao-site-ops.mjs`；检查未意外改变业务文件。独立审查包含语法检查与局部纯测试，不等于全量 CI 或真实部署。
+```bash
+npm run check
+npm test
+npm run test:coverage
+git diff --check
+```
 
-修复后应新增/执行：
-- 无网络 CLI 契约测试（非零退出、含 planned 的错误、未知参数、透传证明参数）。
-- mock MCP 错误/空响应/成功/读回测试，日志与 argv 不含 token。
-- 按既有流水线构建不可变镜像；Docker runtime health 与公网 live smoke 分开记录。
-- ego-browser 真实后台编辑、前台页面及 console 错误检查；人工 publish 之前只记录 draft。
+MCP隔离仓：`node --test scripts/mcp-verification.test.mjs`；各JS `node --check`，shell `bash -n`。不把局部测试当作全量CMS build/CI；本轮不改UI/CMS依赖或基础设施。
+
+新增职责：`test/cli.test.mjs`零网络子进程契约测试；`AGENTS.md`仓级验证入口。调用仍为CLI→原site-lifecycle，没有新部署引擎。
 
 ## 下一步第一件事
 
-向用户确认审查报告的最小修复批次：先修假成功和凭据传递并补离线测试，再恢复 Docker 制品/secret 路径，最后补第二厂商与后台实证。暂不新增审批系统、不动 CF、不发布生产草稿。
+审核本轮两仓修复分支，按PR/CI路径合入。核对模板分支与构建digest/baseline来源、隔离站控制面注册和secret后继续Docker部署；收到用户Claude登录/后台登录确认后补第二厂商及后台实证。不得将goal标完成。
