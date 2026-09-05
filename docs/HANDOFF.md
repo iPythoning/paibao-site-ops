@@ -1,6 +1,29 @@
 # HANDOFF — paibao-site-ops
 
-最后更新：2026-09-05 13:50 +0800
+最后更新：2026-09-05 14:47 +0800
+
+## 最新执行结果：发布基线已修，历史登录token安全门仍红
+
+用户已确认执行最小发布修复。现两仓仍未push/PR/合main，网站容器、DNS、CF、文章均未操作，技能软链尚未迁至main。
+
+- ops新增`.github/workflows/pr-check.yml`，从VibeDevOps模板裁剪为零依赖JS CLI门禁：受管runner变量、同仓PR限制（防fork上持久runner）、固定action SHA、固定gitleaks版本+下载SHA256、随机假key阳性对照且必须exit1、真实历史扫描、syntax/39tests/coverage/npm pack dry-run。不虚构TS编译或容器部署。
+- 站点锁文件修复：仅补@types/react、@types/react-dom、csstype，另同步npm生成的本地file插件元数据，未升级既有运行时版本。干净npm ci（含patch-package）成功。
+- 3个Astro文件补类型：LeadCapture/Base JSON响应类型、[slug]的date字段。8个既有类型错误清零；对比TypeScript transpile前后，三处输出JS逐字一致，没有页面行为改动。
+- quality.yml接MCP38项回归+安全扫描、固定版本与阳性对照；quality/release改受管runner表达式、同仓PR限制和checkout不保留凭据。deploy-cloudflare.yml只同步lock SHA256常量，未触发CF动作。
+- **新鲜验证：ops39 + MCP38 + CMS427 = 504项测试全绿；seed/typecheck(0error)/build/npm pack dry-run通过；4个workflow YAML与所有bash片段语法通过。** 本轮都是本地门禁，不能当作GitHub CI已执行。
+- 安全门阳性对照成功：随机假GitHub token被检出(exit1)。ops历史gitleaks=0；站点历史gitleaks原11项，10项已证明是存储键、公开IndexNow验证文件值或Idempotency-Key测试数据，按精确commit/file/rule/line fingerprint豁免，未放宽目录/规则。
+- **剩余1项未豁免**：站点历史commit `109bb329061f81caa8ad9139a6c713472293131d` 的`docs/templates/CLIENT-OPERATIONS-MANUAL.en.md:28`含来源未明登录token。当前模板已删除值，改为安全渠道单独交付；历史仍在。值从未回显，留存vault引用`EMDASH_LEGACY_MANUAL_LOGIN_TOKEN_REVOKE_PENDING`仅供追溯/撤销，未用于任何认证请求。不能凭模板写24h就断言已失效。
+- 外部审查未完成：Pi codex-exec启动器MODULE_NOT_FOUND；原生codex只读fallback125秒超时，未返回最终报告。不得当作review通过，不再在此轮修Pi。
+- ops还没有注册runner/设置CI_RUNNER；站点已有online/idle xserver runner，CI_RUNNER未设。`onboard-repo.sh`当前实现使用root@IP和token拼SSH argv，违反安全规则，本轮未执行也未改全局工具。后续应用安全的注册通路或先修该工具，不直接照跑。
+
+### 本批新增/变更职责与调用关系
+
+ops仅新增CI workflow；站点新增`.gitleaksignore`精确误报指纹；修改quality/release门禁、CF锁摘要、cms/package-lock、LeadCapture/Base/[slug]类型，以及客户手册去除登录值。没有新增业务服务/调用，三个Astro输出JS不变。完整验证输出保存在`~/.local/state/emdash-release/20260905/`，本交接为持久事实源。
+
+### 下一步（硬停）
+
+先确认该历史登录token来源/撤销情况，并让用户明确授权是否清理相关Git历史（涉及重写提交及受控强推，不能擅自做）。安全门过后补独立复核、runner接入、推PR/CI全绿合main，再迁技能入口。todo#29记录安全阻塞；原goal及#28保持in_progress。
+
 
 ## 最新：用户要求「部署」，发布预检阻塞（尚未推送/合并）
 
