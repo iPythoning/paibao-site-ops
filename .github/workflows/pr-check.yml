@@ -16,9 +16,8 @@ concurrency:
 
 jobs:
   check:
-    # Never run fork code on the persistent builder.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ${{ vars.CI_RUNNER && fromJSON(vars.CI_RUNNER) || 'ubuntu-latest' }}
+    # Fork checks must run, but never on the persistent builder or its configured route.
+    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || (vars.CI_RUNNER && fromJSON(vars.CI_RUNNER) || 'ubuntu-latest') }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
