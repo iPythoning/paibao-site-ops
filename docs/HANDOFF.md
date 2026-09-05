@@ -1,6 +1,18 @@
 # HANDOFF — paibao-site-ops
 
-最后更新：2026-09-05 12:18 +0800
+最后更新：2026-09-05 13:50 +0800
+
+## 最新：用户要求「部署」，发布预检阻塞（尚未推送/合并）
+
+按发布本轮两仓智能体端工具修复处理，不新建站、不重建现有站点容器、不发文章、不操作CF。2026-09-05复跑39+38测试均通过，两修复工作树干净。
+
+- 远端main仍为ops `2196091` / 站点 `58a7a77`；本地修复未上远端。
+- ops仓没有`.github/workflows`，没有可用自动PR检查。
+- 站点main最近Quality `33890546983`及CMS release `33890546992`都在npm ci失败，有分配runner及实际步骤，**不是0步额度拒绝**。日志确认lock不一致，包括`Missing: csstype@3.2.3 from lock file`；不能跳过npm ci/typecheck/build放行。
+- 现有quality/release仍写死ubuntu-latest，且新MCP回归未纳入CI。CMS release只产出artifact，不等于部署到生产。
+- 建议最小发布方案：修复依赖lock基线并按需修复后续暴露的基线错误；ops补CLI检查，站点将MCP测试接入CI及受管runner路由；审查PR、全部门禁绿后合main，再将全局技能入口切到稳定main。无需改DNS/nginx/容器/CF。
+- **下一步先等用户确认上述CI/多文件修复方案**，不直接推红PR或跳过门禁。真正新Docker站另按完整注册/secret/digest前置处理。
+
 
 ## 当前任务 / 写入者
 
