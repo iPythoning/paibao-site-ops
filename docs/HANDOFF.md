@@ -1,8 +1,18 @@
 # HANDOFF — paibao-site-ops
 
-最后更新：2026-09-05（PR合并收尾）
+最后更新：2026-09-05（网站功能接线审查）
 
-## 最新：用户批准合入，两仓main检查成功，技能已迁回main
+## 当前：聚焦网站业务能力，复用OpenShip的已验收输出
+
+用户明确OpenShip由并行会话负责，本线不重复开发/排障部署底座。两个PR合入完成不等于全部网站功能集成。已实跑本CLI的operate：仍为`instructions_only`、`executed:false`、`connected:false`；不能只把未完成归因于用户尚未登录。
+
+本机已有业务控制面/多平台适配与规划、审批、执行、复验、回滚实现，应优先接线，不重造。内容、SEO/GEO、询盘及独立内容生产服务分别有实现，但不能据目录存在或测试通过称全部集成/上线验收完成。完整私有能力矩阵及证据在站点主仓`docs/WEBSITE-FUNCTION-CAPABILITY-AUDIT-20260905.md`（本地`../client-sites/paibaowork/docs/`）。
+
+本轮仅新增私有审查文档、更新两仓HANDOFF/NOW；无运行时代码/调用关系变化。ops check、40测试及coverage通过；业务控制面当前工作树545测试通过，非线上实证。未改任何其他仓在途代码或OpenShip。
+
+下一步方案：为CLI加薄业务接线，读取站点实际能力、提交提案、查询执行/复验结果，复用现有控制面及权限/幂等；默认不批准、不发布。属于多文件功能变更，确认该范围后实施。后续再接业务巡检→修复提案，按权限审批执行及独立复验。完整goal继续active，人工登录/发布和未接线功能均须各自验收。
+
+## 2026-09-05 · 已完成：用户批准合入与main验证
 
 - 用户明确“合入”后，逐一核验head/base/全部Checks，使用`--match-head-commit`绑定已审核SHA squash合并。ops PR#1：`d07b798` → `441e7f6`；站点PR#9：`35dc3c4` → `0ec47d8`。两个合并树分别与已审核候选逐字一致。
 - main真实CI：ops [33961712217](https://github.com/iPythoning/paibao-site-ops/actions/runs/33961712217)成功；站点Quality [33961715405](https://github.com/iPythoning/paibaowork-emdash/actions/runs/33961715405)与CMS release [33961715420](https://github.com/iPythoning/paibaowork-emdash/actions/runs/33961715420)成功。CMS制品`9968166733`已上传，绑定`0ec47d8`；生成制品不是部署网站。
