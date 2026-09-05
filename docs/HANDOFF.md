@@ -1,8 +1,8 @@
 # HANDOFF — paibao-site-ops
 
-最后更新：2026-09-05 18:25 +0800
+最后更新：2026-09-05 18:36 +0800
 
-## 最新：fork PR门禁已修并独立复核通过，发布候选就绪
+## 最新：fork PR门禁已修，两仓候选CI实跑通过，等待合并审核
 
 - 用户17:05明确授权追溯、备份后清史及可能的受控强推。站点完成三份age加密备份和解密校验；当前登录表只读查无匹配，未用旧值认证。
 - 站点14个本地ref精确重写，原8个在途文件和1条可见stash保留；远端仅3个分支以atomic+逐ref旧SHA lease更新。main现`9ebe7c7`，修复分支映射为`9760ffd`；没有把功能修复合入main，也未动容器/CF/文章。
@@ -17,7 +17,15 @@
 
 本轮文件：ops `.github/workflows/pr-check.yml`修改调度；新增`test/ci-routing.test.mjs`，由既有npm test自动收集；本文更新交接。站点修改quality/release，新增`scripts/ci-routing.test.mjs`并接入Quality，AGENTS同步验证入口，新增复核报告。CI增加测试调用，业务运行时调用关系不变，零新增依赖；不做npm发版或无关版本号重构。
 
-下一步：按ship流程发布两仓候选分支、检查PR的实际job/runner/结论，全部成功才合main；不能把本地绿冒充CI绿。合main后将技能入口迁回稳定main。#30已完成，#28继续，#29独立跟踪旧PR快照；人工OAuth/后台、新Docker前置不变。
+已知辅助工具边界：`agents-handoff.sh --check`因末尾条件表达式返回1，且仅识别`.git`目录会漏掉worktree；本轮已读源码核验并逐项检查实际文档/验证入口，未改全局工具，也未把该诊断退出码当成项目测试结论。
+
+### 实际PR/CI证据与下一步
+
+- 本仓 [PR #1](https://github.com/iPythoning/paibao-site-ops/pull/1)，代码候选`4b9f267`的PR Check [33960914498](https://github.com/iPythoning/paibao-site-ops/actions/runs/33960914498)成功：hosted/ubuntu-latest，11个步骤，无失败或跳过。
+- 站点 [PR #9](https://github.com/iPythoning/paibaowork-emdash/pull/9)，代码候选`89851e3`的Quality两次（push/PR）及CMS release全部success。所有job真实分配hosted runner并执行；不是0步失败或整体skipped。制品上传只在push main启用，PR中该单步按预期跳过，构建及可复现校验已成功。
+- 这些是同仓事件，不冒充真实fork事件。收尾文档提交后需复核PR最新head的Checks；不得拿旧SHA的绿灯合并新代码。
+
+下一步：向用户展示两个PR的最终就绪状态，确认合并后用reviewed head约束合main、复核main CI，再迁技能入口。当前尚未合并/部署容器/操作CF/发文章。#30已完成，#28等待PR审核，#29独立跟踪旧PR快照；人工OAuth/后台、新Docker前置不变。
 
 ## 2026-09-05 14:47 · 发布基线修复记录（历史状态，以上最新段落覆盖）
 
