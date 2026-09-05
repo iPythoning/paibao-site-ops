@@ -1,8 +1,21 @@
 # HANDOFF — paibao-site-ops
 
-最后更新：2026-09-05 18:36 +0800
+最后更新：2026-09-05（PR合并收尾）
 
-## 最新：fork PR门禁已修，两仓候选CI实跑通过，等待合并审核
+## 最新：用户批准合入，两仓main检查成功，技能已迁回main
+
+- 用户明确“合入”后，逐一核验head/base/全部Checks，使用`--match-head-commit`绑定已审核SHA squash合并。ops PR#1：`d07b798` → `441e7f6`；站点PR#9：`35dc3c4` → `0ec47d8`。两个合并树分别与已审核候选逐字一致。
+- main真实CI：ops [33961712217](https://github.com/iPythoning/paibao-site-ops/actions/runs/33961712217)成功；站点Quality [33961715405](https://github.com/iPythoning/paibaowork-emdash/actions/runs/33961715405)与CMS release [33961715420](https://github.com/iPythoning/paibaowork-emdash/actions/runs/33961715420)成功。CMS制品`9968166733`已上传，绑定`0ec47d8`；生成制品不是部署网站。
+- 本地两主工作区均在main。ops原本地main为已纳入PR的审查文档提交，旧历史仍由修复分支保留；站点仅快进，8个在途文件及其暂存状态、1条stash保留，未纳入本次提交。
+- 站点当前入口为`../client-sites/paibaowork/docs/HANDOFF.md`，全局`paibaowork-publish/SKILL.md`已指向该主仓的`skills/paibaowork-publish/SKILL.md`。临时`../paibaowork-mcp-verification`工作树已移除，下方涉及它的内容属于历史记录。
+- 删除临时工作树前确认无打开的本地状态文件，将13个SQLite/KV/诊断状态文件完整移存`~/.local/state/emdash-release/20260905/retired-mcp-worktree/.wrangler`，哈希逐一核验，清理时未删除数据库状态。修复分支历史暂留供追溯。
+- 合并后本地主仓ops40+站点MCP/路由40测试通过，两仓全历史gitleaks通过；CMS427/类型/构建/可复现制品由以上main CI实跑。本文回执为纯文档收尾，后续Checks以最新main SHA为准。
+
+下一步：合并已完成，不再请求PR#1/#9合并授权。等待Claude重新登录、第二厂商真实写入及后台编辑/人审发布或明确不发布决定；旧PR快照#29和新Docker完整前置仍独立未完。未部署容器、操作CF或发布文章，完整goal保持active。
+
+本次收尾仅两仓`docs/HANDOFF.md`记录验收及路径，另迁全局技能软链并更新NOW；无新源码文件，无业务调用关系变化。
+
+## 2026-09-05 18:36 · 合并前验收（历史状态，以上最新段落覆盖）
 
 - 用户17:05明确授权追溯、备份后清史及可能的受控强推。站点完成三份age加密备份和解密校验；当前登录表只读查无匹配，未用旧值认证。
 - 站点14个本地ref精确重写，原8个在途文件和1条可见stash保留；远端仅3个分支以atomic+逐ref旧SHA lease更新。main现`9ebe7c7`，修复分支映射为`9760ffd`；没有把功能修复合入main，也未动容器/CF/文章。
