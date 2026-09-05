@@ -1,6 +1,6 @@
 # HANDOFF — paibao-site-ops
 
-最后更新：2026-09-05 12:11 +0800
+最后更新：2026-09-05 12:18 +0800
 
 ## 当前任务 / 写入者
 
@@ -47,6 +47,29 @@ git diff --check
 MCP隔离仓：`node --test scripts/mcp-verification.test.mjs`；各JS `node --check`，shell `bash -n`。不把局部测试当作全量CMS build/CI；本轮不改UI/CMS依赖或基础设施。
 
 新增职责：`test/cli.test.mjs`零网络子进程契约测试；`AGENTS.md`仓级验证入口。调用仍为CLI→原site-lifecycle，没有新部署引擎。
+
+## 本轮文件清单（跨仓）
+
+| 仓/文件 | 目的 |
+|---|---|
+| ops `bin/paibao-site-ops.mjs` | 修复假成功、严格回执与不可变部署参数，暂停CF写路径 |
+| ops `test/cli.test.mjs`（新增） | 39项隔离契约测试，覆盖失败与幂等路径 |
+| ops `package.json` | 增加check/test/coverage入口及Node最低版本 |
+| ops `README.md` | 对齐命令、digest和能力边界 |
+| ops `AGENTS.md`（新增） | 固化本仓测试/安全约束 |
+| ops `skills/paibao-site-ops/SKILL.md` | 删除自动CF/假接管说明，改为受管Docker流程 |
+| ops `docs/HANDOFF.md` | 跨仓证据、阻塞与接续入口 |
+| MCP `scripts/lib/emdash-mcp.mjs`（新增） | 统一协议、认证、错误及超时处理 |
+| MCP `scripts/demo-ai-operator.mjs`（新增） | 执行draft建稿及独立回读验收 |
+| MCP `scripts/demo-ai-operator.sh` | 只exec Node，移除token argv传递 |
+| MCP `scripts/paibaowork-mcp.mjs` | 复用传输并验证参数/工具回执 |
+| MCP `scripts/mcp-verification.test.mjs`（新增） | 38项零网络错误注入与安全测试 |
+| MCP `skills/paibaowork-publish/SKILL.md`（新增） | 提供合法可发现的安全运营技能入口 |
+| MCP `content-pool/MCP-AGENTS.md` | 修正配置、演示语义与未完成验收声明 |
+| MCP `AGENTS.md` | 补MCP验证命令与发布边界 |
+| MCP `docs/HANDOFF.md` | 保存两站草稿ID、真实请求与人审状态 |
+
+调用变化：CLI→site-lifecycle保留；CLI→wrangler自动预建路径移除；MCP CLI/demo统一→共享客户端，shell→Node，不再shell拼请求。全局paibaowork-publish的SKILL软链暂指隔离worktree合法入口，合入main后迁至稳定路径再删除worktree。
 
 ## 下一步第一件事
 
