@@ -91,3 +91,12 @@ for(const command of ['operate','secrets','handover']) {
 }
 test('audit must report ok true', t => { const f=fixture(t,{ok:false}); assert.notEqual(f.run(['audit','--site',f.site]).status,0); });
 test('help succeeds without a starter', t => { const f=fixture(t); assert.equal(f.run(['help']).status,0); });
+
+for(const apply of [false,true])test('create accepts engine unchanged receipt (apply='+apply+')',t=>{
+ const f=fixture(t,{status:'unchanged',manifest:{siteId:'fixture'}});const r=f.run([...create,...(apply?['--apply']:[])]);
+ assert.equal(r.status,0,r.stderr);assert.equal(JSON.parse(r.stdout).status,'unchanged');
+});
+for(const status of ['unchanged','reconfigured'])test('deploy accepts engine '+status,t=>{
+ const f=fixture(t,{status,release:{imageDigest:'sha256:'+'a'.repeat(64)}});
+ const r=f.run(['deploy','--site',f.site,'--apply',...attestation]);assert.equal(r.status,0,r.stderr);assert.equal(JSON.parse(r.stdout).status,status);
+});
